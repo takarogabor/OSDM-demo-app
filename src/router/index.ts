@@ -115,6 +115,7 @@ const handleOfferSearch = async (to: RouteLocationNormalizedGeneric) => {
     const OSDM = inject(osdmClientKey)
     const passengers = usePassengerStore().passengers
     const authStore = useAuthStore()
+    const offerStore = useOfferStore()
 
     const baseRequest: any = {
       anonymousPassengerSpecifications: passengers.map((p) =>
@@ -134,18 +135,21 @@ const handleOfferSearch = async (to: RouteLocationNormalizedGeneric) => {
     if (authStore.requestReservationOfferParts) {
       baseRequest.offerSearchCriteria.requestedOfferParts = ['RESERVATION']
     }
+    if (offerStore.selectedTravelClass) {
+        baseRequest.offerSearchCriteria.travelClasses = [offerStore.selectedTravelClass]
+    }
 
     if (Object.keys(baseRequest.offerSearchCriteria).length === 0) {
       delete baseRequest.offerSearchCriteria
     }
 
-    useOfferStore().setLoading(true)
+    offerStore.setLoading(true)
     const response = await OSDM?.offer.searchOffers(baseRequest)
     if (response?.data?.offers) {
-      useOfferStore().setOffers(response.data.offers)
+      offerStore.setOffers(response.data.offers)
       return
     } else if (response?.data) {
-      useOfferStore().setError(
+      offerStore.setError(
         new OfferListError(
           'No results',
           'No trips could be found for your search request',
@@ -154,7 +158,7 @@ const handleOfferSearch = async (to: RouteLocationNormalizedGeneric) => {
       )
       return
     }
-    useOfferStore().setError(
+    offerStore.setError(
       new OfferListError(
         'An error occurred',
         'The Server returned an error',

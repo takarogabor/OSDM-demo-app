@@ -2,7 +2,21 @@
   <div class="bg-osdm-bg-primary flex flex-row justify-center p-4">
     <sbb-card>
       <div class="flex flex-col xl:flex-row justify-center items-center xl:items-start align-middle gap-4">
-        <InputPlace name="Origin" aria-placeholder="origin" :select-callback="setOrigin" :selected-place="origin" />
+
+        <div class="flex flex-col gap-2 w-full xl:w-auto">
+                  <InputPlace name="Origin" aria-placeholder="origin" :select-callback="setOrigin" :selected-place="origin" />
+                  <select class="border rounded px-2 py-1 text-sm flex-1"
+                  @change="(event: Event) => setTravelClass(event)">
+                    <option value="">-- Travel Class --</option>
+                    <option
+                      v-for="travelClass in travelClasses"
+                      :key="`${travelClass.value}`"
+                      :value="travelClass.value"
+                    >
+                      {{ travelClass.label }}
+                    </option>
+                  </select>
+                </div>
         <div class="flex flex-col gap-2 w-full xl:w-auto">
           <InputPlace name="Destination" aria-placeholder="destination" :select-callback="setDestination"
             :selected-place="destination" />
@@ -45,6 +59,18 @@ import { DateReferenceType, placeToSearchCriteriaLocation, useTripsStore } from 
 import PassengerInput from './PassengerInput.vue'
 import ViasInput from './ViasInput.vue'
 import { usePassengerStore } from '@/stores/passengers'
+import { useOfferStore } from '@/stores/offers'
+
+type TravelClassOption = {
+  value: string
+  label: string
+}
+
+const TRAVEL_CLASS_VALUES = [
+  'FIRST',
+  'SECOND',
+  'ANY_CLASS',
+] as const
 
 export default {
   components: {
@@ -63,7 +89,7 @@ export default {
     destination: components['schemas']['StopPlace'] | undefined
     vias: components['schemas']['StopPlace'][]
     date: Date
-    dateReferenceType: DateReferenceType
+    dateReferenceType: DateReferenceType,
   } {
     return {
       origin: useTripsStore().search?.origin,
@@ -76,6 +102,12 @@ export default {
   computed: {
     loading() {
       return useTripsStore().loading
+    },
+    travelClasses(): TravelClassOption[] {
+        return TRAVEL_CLASS_VALUES.map((value) => ({
+          value,
+          label: value,
+        }))
     },
     passengers() {
       return usePassengerStore().passengers
@@ -116,6 +148,11 @@ export default {
     },
     setPassengers(passengers: components['schemas']['Passenger'][]) {
       usePassengerStore().definePassengers(passengers)
+    },
+    setTravelClass(event: Event) {
+      const value = (event.target as HTMLSelectElement).value as String;
+      console.log('setTravelClass: '+ value)
+      useOfferStore().setSelectedTravelClass(value)
     },
     handleSearchTrip() {
       if (this.origin && this.destination) {

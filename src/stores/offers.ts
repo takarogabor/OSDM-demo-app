@@ -41,6 +41,7 @@ export class OfferListError {
 
 export const useOfferStore = defineStore('offer', {
   state: (): {
+    selectedTravelClass: String | undefined
     offers: components['schemas']['Offer'][]
     selectedOffer: components['schemas']['Offer'] | undefined
     selectedAncilleries: components['schemas']['AncillaryOfferPart'][]
@@ -48,6 +49,7 @@ export const useOfferStore = defineStore('offer', {
     error: OfferListError | undefined
     loading: boolean
   } => ({
+    selectedTravelClass: undefined,
     offers: [],
     selectedOffer: undefined,
     selectedAncilleries: [],
@@ -80,6 +82,10 @@ export const useOfferStore = defineStore('offer', {
       this.selectedOffer = offer
       this.selectedAncilleries = ancillaries
       this.selectedPlaceSelections = JSON.parse(JSON.stringify(placeSelections ?? []))
+    },
+    setSelectedTravelClass(travelClass: String | undefined) {
+      this.selectedTravelClass = travelClass
+      console.log('Offer store selectedTravelClass:' + this.selectedTravelClass)
     },
     unselectOffer() {
       this.selectedOffer = undefined

@@ -2,13 +2,13 @@
   <sbb-card>
     <div class="flex items-center gap-2 md:gap-5">
       <TripPearlChain :trip="trip" />
-      <sbb-button icon-name="chevron-right-small" size="s" @click="handleSelect"></sbb-button>
+      <sbb-button icon-name="chevron-right-small" size="s" @click="handleSelect">By TripId</sbb-button>
       <sbb-button
               icon-name="chevron-right-small"
               size="s"
               @click="handleSelectTripSpec"
             >
-              TripSpec
+              By TripSpec
             </sbb-button>
     </div>
   </sbb-card>
