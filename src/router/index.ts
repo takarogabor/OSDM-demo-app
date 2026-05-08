@@ -301,6 +301,8 @@ const handleBooking = async (to: RouteLocationNormalizedGeneric) => {
       purchaser: {
         detail: passengers[0].detail ?? { firstName: '', lastName: '' },
       },
+      requestedFulfillmentType: 'ETICKET',
+      preferredFulfillmentMedia: 'UIC_PDF',
     }
 
     useBookingStore().setLoading(true)
