@@ -89,6 +89,20 @@ export class OSDMBooking {
     })
   }
 
+  getFulfillment(fulfillmentId) {
+   return this.client?.GET('/fulfillments/{fulfillmentId}', {
+     params: {
+       header: {
+         Requestor: this.requestor,
+         'Content-Type': 'application/json',
+       },
+       path: {
+         fulfillmentId,
+       },
+     },
+   })
+  }
+
   requestRefundOffers(
     bookingId: string,
     request: components['schemas']['RefundOfferRequest'],

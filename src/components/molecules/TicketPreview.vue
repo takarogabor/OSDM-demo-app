@@ -47,8 +47,11 @@
       :key="`ful-${fulfillment.id}`"
     >
       <div>
-        <span>Control Number: {{ fulfillment.controlNumber }}</span>
-
+        <div class="flex items-center justify-between mb-2">
+          <span>Control Number: {{ fulfillment.controlNumber }}</span>
+          <sbb-button icon-name="chevron-right-small"
+              @click="getFulfillment(fulfillment.id)">Fetch documents</sbb-button>
+        </div>
         <div
           v-for="(fulfillmentDocument, index) in fulfillment.fulfillmentDocuments"
           :key="`ful-doc-${fulfillment.id}-${index}`"
@@ -121,7 +124,18 @@ export default {
       }
     }
 
-    return { cleanupBooking, cleanupLoading, displayPrice }
+    const getFulfillment = async (fulfillmentId) => {
+          console.log(fulfillmentId);
+
+          try {
+            await OSDM?.booking.getFulfillment(fulfillmentId)
+          } catch (error) {
+            console.error('Get fulfillment failed', error)
+          }
+
+        }
+
+    return { cleanupBooking, cleanupLoading, displayPrice, getFulfillment }
   },
 }
 </script>
