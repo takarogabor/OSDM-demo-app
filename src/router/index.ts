@@ -135,8 +135,8 @@ const handleOfferSearch = async (to: RouteLocationNormalizedGeneric) => {
     if (authStore.requestReservationOfferParts) {
       baseRequest.offerSearchCriteria.requestedOfferParts = ['RESERVATION']
     }
-    if (offerStore.selectedTravelClass) {
-        baseRequest.offerSearchCriteria.travelClasses = [offerStore.selectedTravelClass]
+    if (offerStore.selectedTravelClasses.length > 0) {
+        baseRequest.offerSearchCriteria.travelClasses = [...offerStore.selectedTravelClasses]
     }
 
     if (Object.keys(baseRequest.offerSearchCriteria).length === 0) {

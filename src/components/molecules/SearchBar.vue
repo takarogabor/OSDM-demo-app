@@ -4,19 +4,36 @@
       <div class="flex flex-col xl:flex-row justify-center items-center xl:items-start align-middle gap-4">
 
         <div class="flex flex-col gap-2 w-full xl:w-auto">
-                  <InputPlace name="Origin" aria-placeholder="origin" :select-callback="setOrigin" :selected-place="origin" />
-                  <select class="border rounded px-2 py-1 text-sm flex-1"
-                  @change="(event: Event) => setTravelClass(event)">
-                    <option value="">-- Travel Class --</option>
-                    <option
-                      v-for="travelClass in travelClasses"
-                      :key="`${travelClass.value}`"
-                      :value="travelClass.value"
-                    >
-                      {{ travelClass.label }}
-                    </option>
-                  </select>
-                </div>
+          <InputPlace name="Origin" aria-placeholder="origin" :select-callback="setOrigin" :selected-place="origin" />
+          <div class="flex flex-col gap-2">
+            <div class="flex gap-2 items-center">
+              <select class="border rounded px-2 py-1 text-sm flex-1" @change="(event: Event) => addTravelClass(event)">
+                <option value="">-- Travel Class --</option>
+                <option
+                  v-for="travelClass in travelClasses"
+                  :key="`${travelClass.value}`"
+                  :value="travelClass.value"
+                  :disabled="selectedTravelClasses.includes(travelClass.value)"
+                >
+                  {{ travelClass.label }}
+                </option>
+              </select>
+              <sbb-button size="s" variant="secondary" @click="clearTravelClasses" :disabled="selectedTravelClasses.length === 0">
+                Clear
+              </sbb-button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="tc in selectedTravelClasses"
+                :key="tc"
+                class="bg-osdm-bg-secondary text-xs px-2 py-1 rounded flex items-center gap-1"
+              >
+                {{ tc }}
+                <button class="text-red-600" @click="removeTravelClass(tc)">&times;</button>
+              </span>
+            </div>
+          </div>
+        </div>
         <div class="flex flex-col gap-2 w-full xl:w-auto">
           <InputPlace name="Destination" aria-placeholder="destination" :select-callback="setDestination"
             :selected-place="destination" />
@@ -109,6 +126,9 @@ export default {
           label: value,
         }))
     },
+    selectedTravelClasses() {
+      return useOfferStore().selectedTravelClasses
+    },
     passengers() {
       return usePassengerStore().passengers
     },
@@ -149,10 +169,19 @@ export default {
     setPassengers(passengers: components['schemas']['Passenger'][]) {
       usePassengerStore().definePassengers(passengers)
     },
-    setTravelClass(event: Event) {
-      const value = (event.target as HTMLSelectElement).value as String;
-      console.log('setTravelClass: '+ value)
-      useOfferStore().setSelectedTravelClass(value)
+    addTravelClass(event: Event) {
+      const select = event.target as HTMLSelectElement
+      const value = select.value as string
+      if (!value) return
+      useOfferStore().addTravelClass(value)
+      // reset select so same option can be re-chosen after removal
+      select.value = ''
+    },
+    removeTravelClass(travelClass: string) {
+      useOfferStore().removeTravelClass(travelClass)
+    },
+    clearTravelClasses() {
+      useOfferStore().clearTravelClasses()
     },
     handleSearchTrip() {
       if (this.origin && this.destination) {
