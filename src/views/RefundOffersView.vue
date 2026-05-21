@@ -67,13 +67,13 @@
             <div><b>ID:</b> {{ o.id }}</div>
             <div>
               <b>Refundable amount:</b>
-              {{ o.refundableAmount?.amount }} {{ o.refundableAmount?.currency }}
+              {{ displayPrice(o.refundableAmount) }}
             </div>
             <div>
               <b>Fee:</b>
-              {{ o.refundFee?.amount }} {{ o.refundFee?.currency }}
+              {{ displayPrice(o.refundFee) }}
             </div>
-            <div><b>Valid until:</b> {{ o.validUntil }}</div>
+            <div><b>Valid until:</b> {{ formatDateDotSeparated(o.validUntil) }}</div>
             <div class="mt-2 flex gap-2 items-center">
                 <sbb-button
                   icon-name="chevron-right-small"
@@ -104,6 +104,8 @@ import { defineComponent } from 'vue'
 import { osdmClientKey } from '@/types/symbols'
 import { BookingError, useBookingStore } from '@/stores/booking'
 import type { components } from '@/schemas/schema'
+import { displayPrice } from '@/helpers/price'
+import { formatDateDotSeparated } from '@/helpers/conversions'
 
 export default defineComponent({
   components: { HeaderBar, SbbLoadingIndicator },
@@ -176,6 +178,9 @@ export default defineComponent({
       this.loading = false
       this.status = ''
     }
+  },
+  setup() {
+    return { displayPrice, formatDateDotSeparated }
   },
   methods: {
     async loadRefundOffers() {

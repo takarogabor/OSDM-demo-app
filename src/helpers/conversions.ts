@@ -73,6 +73,28 @@ export const convertOsdmDateToDate = (osdmDate: string): Date => {
     return new Date(osdmDate)
 }
 
+/**
+ * Convert a JavaScript Date (or ISO‑date string) to the format
+ *   YYYY.MM.DD   (e.g. 2026.05.21)
+ *
+ * Accepts:
+ *   - Date instance
+ *   - ISO‑date string (e.g. "2026-05-21" or "2026-05-21T13:37:00Z")
+ *
+ * Returns an empty string for invalid/undefined input.
+ */
+export const formatDateDotSeparated = (value: Date | string | undefined): string => {
+    if (!value) return '';
+
+    const date = value instanceof Date ? value : new Date(value);
+    if (isNaN(date.getTime())) return '';
+
+    const year  = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day   = String(date.getDate()).padStart(2, '0');
+
+    return `${year}.${month}.${day}`;
+};
 
 const REDUCTION_CARD_CODES = ['UIC_EURAIL', 'UIC_INTERRAIL'] as const;
 
