@@ -46,7 +46,7 @@
       v-for="fulfillment in booking?.fulfillments"
       :key="`ful-${fulfillment.id}`"
     >
-      <div>
+      <div class="flex flex-col gap-3">
         <div class="flex items-center justify-between mb-2">
           <span>Control Number: {{ fulfillment.controlNumber }}</span>
           <sbb-button icon-name="chevron-right-small"
@@ -55,18 +55,21 @@
         <div
           v-for="(fulfillmentDocument, index) in fulfillment.fulfillmentDocuments"
           :key="`ful-doc-${fulfillment.id}-${index}`"
-          class="flex flex-col"
+          class="flex flex-col gap-2"
         >
-          <a
+          <sbb-button
             v-if="fulfillmentDocument.downloadLink"
-            :href="fulfillmentDocument.downloadLink"
-            target="_blank"
-            class="text-blue-500 hover:underline"
-            >Download Ticket</a
-          >
+            size="s"
+            icon-name="download-small"
+            @click="downloadDocument(fulfillmentDocument)">
+            Download Ticket ({{ fulfillmentDocument.medium }})
+          </sbb-button>
           <img
-            v-if="fulfillmentDocument.downloadLink?.endsWith('.png')"
-            :src="fulfillmentDocument.downloadLink"
+            v-if="
+              fulfillmentDocument.downloadLink?.endsWith('.png') &&
+              documentBlobUrls[fulfillmentDocument.downloadLink]
+            "
+            :src="documentBlobUrls[fulfillmentDocument.downloadLink]"
             class="self-center m-4"
           />
           <sbb-loading-indicator
@@ -91,10 +94,11 @@
 </template>
 
 <script lang="ts">
-import { inject, ref } from 'vue'
+import { inject, onBeforeUnmount, ref } from 'vue'
 import { displayPrice } from '@/helpers/price'
 import { useBookingStore } from '@/stores/booking'
 import { osdmClientKey } from '@/types/symbols'
+import type { components } from '@/schemas/schema'
 import { SbbCardElement as SbbCard } from '@sbb-esta/lyne-elements/card'
 
 export default {
@@ -107,6 +111,7 @@ export default {
   setup() {
     const OSDM = inject(osdmClientKey)
     const cleanupLoading = ref(false)
+    const documentBlobUrls = ref<Record<string, string>>({})
 
     const cleanupBooking = async () => {
       const bookingId = useBookingStore().booking?.id
@@ -124,18 +129,52 @@ export default {
       }
     }
 
-    const getFulfillment = async (fulfillmentId) => {
-          console.log(fulfillmentId);
+    const getFulfillment = async (fulfillmentId: string) => {
+      try {
+        await OSDM?.booking.getFulfillment(fulfillmentId)
+      } catch (error) {
+        console.error('Get fulfillment failed', error)
+      }
+    }
 
-          try {
-            await OSDM?.booking.getFulfillment(fulfillmentId)
-          } catch (error) {
-            console.error('Get fulfillment failed', error)
-          }
+    const downloadDocument = async (fulfillmentDocument: components['schemas']['FulfillmentDocument']) => {
+      const url = fulfillmentDocument?.downloadLink
+      if (!url) return
 
+      // If already downloaded, just open the cached blob URL
+      if (documentBlobUrls.value[url]) {
+        window.open(documentBlobUrls.value[url], '_blank')
+        return
+      }
+
+      try {
+        const result = await OSDM?.booking.downloadFulfillmentDocument(url)
+
+        if (!result || result.error) {
+          throw new Error(`Failed to download document (${result?.error?.status ?? 'unknown status'})`)
         }
 
-    return { cleanupBooking, cleanupLoading, displayPrice, getFulfillment }
+        const blob = result.data as Blob
+        const objectUrl = URL.createObjectURL(blob)
+        documentBlobUrls.value[url] = objectUrl
+        window.open(objectUrl, '_blank')
+      } catch (error) {
+        console.error('Document download failed', error)
+      }
+    }
+
+    onBeforeUnmount(() => {
+      Object.values(documentBlobUrls.value).forEach((blobUrl) => URL.revokeObjectURL(blobUrl))
+    })
+
+    return {
+      cleanupBooking,
+      cleanupLoading,
+      displayPrice,
+      getFulfillment,
+      downloadDocument,
+      documentBlobUrls,
+    }
   },
 }
 </script>

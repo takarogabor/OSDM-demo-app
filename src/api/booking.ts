@@ -89,7 +89,7 @@ export class OSDMBooking {
     })
   }
 
-  getFulfillment(fulfillmentId) {
+  getFulfillment(fulfillmentId: string) {
    return this.client?.GET('/fulfillments/{fulfillmentId}', {
      params: {
        header: {
@@ -101,6 +101,18 @@ export class OSDMBooking {
        },
      },
    })
+  }
+
+  downloadFulfillmentDocument(downloadLink: string) {
+    return this.client?.GET(downloadLink as any, {
+      params: {
+        header: {
+          Requestor: this.requestor,
+          Accept: '*/*',
+        },
+      },
+      parseAs: 'blob',
+    })
   }
 
   requestRefundOffers(
