@@ -176,22 +176,38 @@ const handleBooking = async (to: RouteLocationNormalizedGeneric) => {
     const OSDM = inject(osdmClientKey)
     const passengers = usePassengerStore().passengers
     const offerStore = useOfferStore()
+    const coveredTripId = offerStore.selectedOffer?.tripCoverage?.coveredTripId
+    const coveredLegIds = offerStore.selectedOffer?.tripCoverage?.coveredLegIds ?? []
 
     const ancillaryIdsRaw = to.query.ancillariesIds ?? to.query.ancilleryIds
     const ancillaryIds = ancillaryIdsRaw
       ? JSON.parse(ancillaryIdsRaw.toString())
       : offerStore.selectedAncilleries.map((ancillary) => ancillary.id)
 
-    const normalizePlaceSelections = (rawSelections: any[]): any[] => {
+    const normalizePlaceSelections = (
+      rawSelections: any[],
+      coverage: { tripId?: string; legIds: string[] },
+    ): any[] => {
       if (!Array.isArray(rawSelections)) {
         return []
       }
 
+      const expandWithCoverage = (selection: any): any[] => {
+        if (coverage.tripId && coverage.legIds.length > 0) {
+          return coverage.legIds.map((legId: string) => ({
+            ...selection,
+            tripLegCoverage: { tripId: coverage.tripId, legId },
+          }))
+        }
+
+        return [selection]
+      }
+
       return rawSelections
-        .map((selection: any) => {
+        .flatMap((selection: any) => {
           const reservationId = selection?.reservationId?.toString?.()
           if (!reservationId) {
-            return null
+            return []
           }
 
           const normalizedAccommodations = Array.isArray(selection?.accommodations)
@@ -228,12 +244,11 @@ const handleBooking = async (to: RouteLocationNormalizedGeneric) => {
               : []
 
             if (!coachNumber || !placeNumber || passengerRefs.length === 0) {
-              return null
+              return []
             }
 
-            return {
+            const baseSelection = {
               reservationId,
-              tripLegCoverage: { tripId: '1', legId: '1' },
               passengerRefs,
               referencePlace: {
                 coachNumber,
@@ -241,6 +256,8 @@ const handleBooking = async (to: RouteLocationNormalizedGeneric) => {
               },
               ...(normalizedAccommodations.length > 0 ? { accommodations: normalizedAccommodations } : {}),
             }
+
+            return expandWithCoverage(baseSelection)
           }
 
           const places = Array.isArray(selection?.places)
@@ -262,22 +279,29 @@ const handleBooking = async (to: RouteLocationNormalizedGeneric) => {
             : []
 
           if (places.length === 0 && normalizedAccommodations.length === 0) {
-            return null
+            return []
           }
 
-          return {
+          const baseSelection = {
             reservationId,
-            tripLegCoverage: { tripId: '1', legId: '1' },
             ...(places.length > 0 ? { places } : {}),
             ...(normalizedAccommodations.length > 0 ? { accommodations: normalizedAccommodations } : {}),
           }
+
+          return expandWithCoverage(baseSelection)
         })
-        .filter((selection: any) => !!selection)
+        .flat()
     }
 
-    const storePlaceSelections = normalizePlaceSelections(offerStore.selectedPlaceSelections as any[])
+    const storePlaceSelections = normalizePlaceSelections(offerStore.selectedPlaceSelections as any[], {
+      tripId: coveredTripId,
+      legIds: coveredLegIds,
+    })
     const queryPlaceSelections = to.query.placeSelections
-      ? normalizePlaceSelections(JSON.parse(to.query.placeSelections.toString()))
+      ? normalizePlaceSelections(JSON.parse(to.query.placeSelections.toString()), {
+          tripId: coveredTripId,
+          legIds: coveredLegIds,
+        })
       : []
     const placeSelections = storePlaceSelections.length > 0 ? storePlaceSelections : queryPlaceSelections
 
