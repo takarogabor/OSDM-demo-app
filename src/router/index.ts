@@ -15,6 +15,8 @@ import { OfferListError, useOfferStore } from '@/stores/offers'
 import { useAuthStore } from '@/stores/auth'
 import { convertDateToOsdmDateTime, convertPassengerToAnonymousPassengerSpecification, convertPlaceToRef } from '@/helpers/conversions'
 
+const createExternalRef = () => crypto.randomUUID()
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -126,7 +128,10 @@ const handleOfferSearch = async (to: RouteLocationNormalizedGeneric) => {
 
     if (to.query.tripSpec) {
       const tripSpec = JSON.parse(decodeURIComponent(atob(to.query.tripSpec.toString())))
-      baseRequest.tripSpecifications = [tripSpec]
+      baseRequest.tripSpecifications = [{
+        ...tripSpec,
+        externalRef: createExternalRef(),
+      }]
     } else {
       const trip = JSON.parse(decodeURIComponent(atob(to.query.trip!.toString())))
       baseRequest.tripIds = [trip.id]
@@ -320,6 +325,7 @@ const handleBooking = async (to: RouteLocationNormalizedGeneric) => {
     }
 
     const bookingRequest = {
+      externalRef: createExternalRef(),
       offers: [offerRequest],
       passengerSpecifications: passengers,
       purchaser: {
