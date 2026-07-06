@@ -328,9 +328,6 @@ const handleBooking = async (to: RouteLocationNormalizedGeneric) => {
       externalRef: createExternalRef(),
       offers: [offerRequest],
       passengerSpecifications: passengers,
-      purchaser: {
-        detail: passengers[0].detail ?? { firstName: '', lastName: '' },
-      },
       requestedFulfillmentType: 'ETICKET',
       preferredFulfillmentMedia: 'UIC_PDF',
     }
