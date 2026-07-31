@@ -143,6 +143,9 @@ const handleOfferSearch = async (to: RouteLocationNormalizedGeneric) => {
     if (offerStore.selectedTravelClasses.length > 0) {
         baseRequest.offerSearchCriteria.travelClasses = [...offerStore.selectedTravelClasses]
     }
+    if (offerStore.selectedOfferMode) {
+      baseRequest.offerSearchCriteria.offerMode = offerStore.selectedOfferMode
+    }
 
     if (Object.keys(baseRequest.offerSearchCriteria).length === 0) {
       delete baseRequest.offerSearchCriteria
@@ -328,8 +331,8 @@ const handleBooking = async (to: RouteLocationNormalizedGeneric) => {
       externalRef: createExternalRef(),
       offers: [offerRequest],
       passengerSpecifications: passengers,
-      requestedFulfillmentType: 'ETICKET',
-      preferredFulfillmentMedia: 'UIC_PDF',
+       requestedFulfillmentType: 'ETICKET',
+       preferredFulfillmentMedia: 'UIC_PDF',
     }
 
     useBookingStore().setLoading(true)

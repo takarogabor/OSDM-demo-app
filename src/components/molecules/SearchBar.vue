@@ -7,6 +7,21 @@
           <InputPlace name="Origin" aria-placeholder="origin" :select-callback="setOrigin" :selected-place="origin" />
           <div class="flex flex-col gap-2">
             <div class="flex gap-2 items-center">
+              <select v-model="selectedOfferModeString" class="border rounded px-2 py-1 text-sm flex-1">
+                <option value="">-- Offer Mode --</option>
+                <option
+                  v-for="offerMode in offerModes"
+                  :key="offerMode.value"
+                  :value="offerMode.value"
+                >
+                  {{ offerMode.label }}
+                </option>
+              </select>
+              <sbb-button size="s" variant="secondary" @click="clearOfferMode" :disabled="!selectedOfferMode">
+                Clear
+              </sbb-button>
+            </div>
+            <div class="flex gap-2 items-center">
               <select class="border rounded px-2 py-1 text-sm flex-1" @change="(event: Event) => addTravelClass(event)">
                 <option value="">-- Travel Class --</option>
                 <option
@@ -83,11 +98,20 @@ type TravelClassOption = {
   label: string
 }
 
+type OfferModeOption = {
+  value: OfferMode
+  label: string
+}
+
+type OfferMode = components['schemas']['OfferMode']
+
 const TRAVEL_CLASS_VALUES = [
   'FIRST',
   'SECOND',
   'ANY_CLASS',
 ] as const
+
+const OFFER_MODE_VALUES: OfferMode[] = ['COLLECTIVE', 'INDIVIDUAL']
 
 export default {
   components: {
@@ -126,11 +150,28 @@ export default {
           label: value,
         }))
     },
+    offerModes(): OfferModeOption[] {
+      return OFFER_MODE_VALUES.map((value) => ({
+        value,
+        label: value,
+      }))
+    },
     selectedTravelClasses() {
       return useOfferStore().selectedTravelClasses
     },
+    selectedOfferMode() {
+      return useOfferStore().selectedOfferMode
+    },
     passengers() {
       return usePassengerStore().passengers
+    },
+    selectedOfferModeString: {
+      get(): OfferMode | '' {
+        return useOfferStore().selectedOfferMode ?? ''
+      },
+      set(value: OfferMode | '') {
+        useOfferStore().setOfferMode(value || undefined)
+      },
     },
     dateReferenceTypeString: {
       get() {
@@ -182,6 +223,9 @@ export default {
     },
     clearTravelClasses() {
       useOfferStore().clearTravelClasses()
+    },
+    clearOfferMode() {
+      useOfferStore().setOfferMode(undefined)
     },
     handleSearchTrip() {
       if (this.origin && this.destination) {
