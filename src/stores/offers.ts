@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import type { components } from '@/schemas/schema'
 import { displayPrice, extractPriceFromOffer } from '@/helpers/price'
 
+type OfferMode = components['schemas']['OfferMode']
+
 export interface SelectedPlace {
   coachNumber: string
   placeNumber: string
@@ -42,6 +44,7 @@ export class OfferListError {
 export const useOfferStore = defineStore('offer', {
   state: (): {
     selectedTravelClasses: string[]
+    selectedOfferMode: OfferMode | undefined
     offers: components['schemas']['Offer'][]
     selectedOffer: components['schemas']['Offer'] | undefined
     selectedAncilleries: components['schemas']['AncillaryOfferPart'][]
@@ -50,6 +53,7 @@ export const useOfferStore = defineStore('offer', {
     loading: boolean
   } => ({
     selectedTravelClasses: [],
+    selectedOfferMode: undefined,
     offers: [],
     selectedOffer: undefined,
     selectedAncilleries: [],
@@ -97,6 +101,9 @@ export const useOfferStore = defineStore('offer', {
     clearTravelClasses() {
       this.selectedTravelClasses = []
       console.log('Offer store clear travelClasses')
+    },
+    setOfferMode(offerMode: OfferMode | undefined) {
+      this.selectedOfferMode = offerMode
     },
     unselectOffer() {
       this.selectedOffer = undefined
