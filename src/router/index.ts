@@ -375,8 +375,8 @@ const handleFulfillment = async (to: RouteLocationNormalizedGeneric) => {
       if (to.query.bookingId) {
         OSDM?.booking.updatePassengerInformation(
           p,
-          p.id,
           to.query.bookingId.toString(),
+          p.id,
         )
       }
     }))
