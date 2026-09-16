@@ -314,6 +314,7 @@ const handleBooking = async (to: RouteLocationNormalizedGeneric) => {
     const placeSelections = storePlaceSelections.length > 0 ? storePlaceSelections : queryPlaceSelections
 
     const offerRequest: any = {
+      externalRef: createExternalRef(),
       offerId: to.query.offerId.toString(),
       afterSaleByRetailerOnly: null,
       passengerRefs: passengers.map((p) => p.externalRef),
@@ -371,15 +372,14 @@ const handleFulfillment = async (to: RouteLocationNormalizedGeneric) => {
     const OSDM = inject(osdmClientKey)
 
     const passengers = usePassengerStore().passengers
-    await Promise.all(passengers.map((p) => {
-      if (to.query.bookingId) {
-        OSDM?.booking.updatePassengerInformation(
-          p,
-          to.query.bookingId.toString(),
-          p.id,
-        )
-      }
-    }))
+    for (const p of passengers) {
+      await OSDM?.booking.updatePassengerInformation(
+        p,
+        to.query.bookingId!.toString(),
+        p.id,
+      )
+    }
+
 
     await OSDM?.booking.fulfillBooking(
       to.query.bookingId.toString(),
