@@ -32,11 +32,11 @@
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <InputDate size="s" name="Birthday" :value="getBirthdate(passenger)"
+                    <InputDate size="s" name="Birthday" :value="getBirthdate(passenger) ?? undefined"
                         :select-callback="(selectedDate: Date | null) => updatePassengerDate(selectedDate, index)" />
 
                     <div class="flex gap-2 items-center">
-                        <InputNumber size="s" class="min-w-24" name="Age" :value="passenger.age"
+                        <InputNumber size="s" class="min-w-24" name="Age" :value="passenger.age ?? undefined"
                             :min="0" :max="150"
                             @input="(event: Event) => updatePassengerAge(event, index)" />
 
@@ -124,17 +124,12 @@ export default {
             this.expanded = false;
             window.removeEventListener("click", this.checkClickOutside)
         },
-        getDummyDate() {
-            const dummyBirthdate = new Date(Date.now());
-            dummyBirthdate.setFullYear(dummyBirthdate.getFullYear() - 27)
-            return dummyBirthdate
-        },
         addPassenger() {
             this.selectCallback([...this.selectedPassengers, {
                 id: `passenger_0${this.selectedPassengers.length + 1}`,
                 externalRef: `passenger_0${this.selectedPassengers.length + 1}`,
-                dateOfBirth: convertDateToOsdmDate(this.getDummyDate()),
-                age: null,
+                dateOfBirth: null,
+                age: 27,
                 type: 'PERSON',
                 cards: [],
             }])

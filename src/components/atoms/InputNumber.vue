@@ -10,7 +10,7 @@ import { SbbFormFieldElement as SbbFormField } from '@sbb-esta/lyne-elements/for
 export default {
     props: {
         name: String,
-        value: String,
+        value: [String, Number],
         size: String,
         min: Number,
         max: Number,
