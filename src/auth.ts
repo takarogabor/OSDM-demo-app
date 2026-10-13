@@ -41,7 +41,7 @@ export class AccessToken {
     formData.append('grant_type', 'client_credentials');
     formData.append('client_id', useAuthStore().clientId);
     formData.append('client_secret', useAuthStore().clientSecret);
-    formData.append('scope', 'openid');
+    formData.append('scope', 'uic_osdm');
 
     const response = await fetch(
       `${useAuthStore().authURL}/realms/osdm/protocol/openid-connect/token`,
@@ -71,7 +71,7 @@ export class AccessToken {
       this.requestors = data.requestor_ref
     }
   }
-  
+
 }
 
 export const AuthMiddleware: Middleware = {
